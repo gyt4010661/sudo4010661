@@ -104,22 +104,3 @@ RUN rm -rf /etc/apt/sources.list && \
 	echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main"|tee /etc/apt/sources.list.d/brave-browser-release.list && \
 	apt update && \
 	apt install brave-browser -y && \
-#PeaZip
-	wget https://github.com/peazip/PeaZip/releases/download/7.9.0/peazip_7.9.0.LINUX.x86_64.GTK2.deb && \
-	dpkg -i peazip_7.9.0.LINUX.x86_64.GTK2.deb && \
-	rm -rf peazip_7.9.0.LINUX.x86_64.GTK2.deb && \
-#Sublime
-	curl -fsSL https://download.sublimetext.com/sublimehq-pub.gpg | apt-key add - && \
-	add-apt-repository "deb https://download.sublimetext.com/ apt/stable/" && \
-	apt install -y sublime-text && \
-#Ngrok
-	chmod +x /app/ngrok_install.sh && \
-	/app/ngrok_install.sh && \
-#Telegram
-	wget https://updates.tdesktop.com/tlinux/tsetup.2.7.4.tar.xz -P /tmp && \
-	tar -xvf /tmp/tsetup.2.7.4.tar.xz -C /tmp && \
-	mv /tmp/Telegram/Telegram /usr/bin/telegram && \
-
-ENTRYPOINT ["supervisord", "-c"]
-
-CMD ["/app/supervisord.conf"]
