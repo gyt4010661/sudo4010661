@@ -35,18 +35,60 @@ CMD ["/opt/bin/entry_point.sh"]
 #============================
 FROM ubuntu-base as ubuntu-utilities
 
-RUN apt-get -qqy update \
-    && apt-get -qqy --no-install-recommends install \
-        firefox htop terminator gnupg2 software-properties-common \
-    && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt install -qqy --no-install-recommends ./google-chrome-stable_current_amd64.deb \
-    && apt-add-repository ppa:remmina-ppa-team/remmina-next \
-    && apt update \
-    && apt install -qqy --no-install-recommends remmina remmina-plugin-rdp remmina-plugin-secret \
-    && apt-add-repository ppa:obsproject/obs-studio \
-    && apt update \
-    && docker run -e APPLICATION_KEY=073e8ec9-7a11-400e-a4d7-d7ef1d31ce0b otohits/app:latest \
-    && apt update \
+RUN rm -rf /etc/apt/sources.list && \
+#All Official Focal Repos
+	bash -c 'echo -e "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu focal partner\ndeb-src http://archive.canonical.com/ubuntu focal partner" >/etc/apt/sources.list' && \
+	rm /bin/sh && ln -s /bin/bash /bin/sh && \
+	apt-get update && \
+	apt-get install -y \
+#Packages Installation
+	tzdata \
+	software-properties-common \
+	apt-transport-https \
+	wget \
+	git \
+	curl \
+	vim \
+	zip \
+	net-tools \
+	iputils-ping \
+	build-essential \
+	python3 \
+	python3-pip \
+	python-is-python3 \
+	perl \
+	ruby \
+	golang \
+	lua5.3 \
+	scala \
+	mono-complete \
+	r-base \
+	default-jre \
+	default-jdk \
+	clojure \
+	php \
+	firefox \
+	gnome-terminal \
+	gnome-calculator \
+	gnome-system-monitor \
+	gedit \
+	vim-gtk3 \
+	mousepad \
+	libreoffice \
+	pcmanfm \
+	snapd \
+	terminator \
+	websockify \
+	supervisor \
+	x11vnc \
+	xvfb \
+	gnupg \
+	dirmngr \
+	gdebi-core \
+	nginx \
+	novnc \
+	openvpn \
+	ffmpeg \
 
 
 
