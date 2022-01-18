@@ -45,9 +45,9 @@ RUN apt-get -qqy update \
     && apt install -qqy --no-install-recommends remmina remmina-plugin-rdp remmina-plugin-secret \
     && apt-add-repository ppa:obsproject/obs-studio \
     && apt update \
-    && apt install snapd -y \
+    && apt install snapd \
     && apt update \
-    && snap install docker -y \
+    && snap install docker \
     && apt update \
 
 
