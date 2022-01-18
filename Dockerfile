@@ -50,9 +50,6 @@ RUN apt-get -qqy update \
     && apt-get autoclean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-    
-    
-#Docker
     && apt-get install \
     && ca-certificates \
     && curl \
