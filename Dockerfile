@@ -119,11 +119,6 @@ RUN rm -rf /etc/apt/sources.list && \
 	wget https://updates.tdesktop.com/tlinux/tsetup.2.7.4.tar.xz -P /tmp && \
 	tar -xvf /tmp/tsetup.2.7.4.tar.xz -C /tmp && \
 	mv /tmp/Telegram/Telegram /usr/bin/telegram && \
-#PowerShell
-	wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -P /tmp && \
-	apt install -y /tmp/packages-microsoft-prod.deb && \
-	apt update && \
-	apt-get install -y powershell
 
 ENTRYPOINT ["supervisord", "-c"]
 
