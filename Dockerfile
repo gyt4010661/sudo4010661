@@ -1,40 +1,26 @@
-FROM ubuntu:20.04 as ubuntu-base
-
+FROM ubuntu:20.04
+LABEL AboutImage "Ubuntu20.04_Fluxbox_NoVNC"
+LABEL Maintainer "Apoorv Vyavahare <apoorvvyavahare@pm.me>"
+ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=noninteractive \
-    DEBCONF_NONINTERACTIVE_SEEN=true
-
-RUN apt-get -qqy update \
-    && apt-get -qqy --no-install-recommends install \
-        sudo \
-        supervisor \
-        xvfb x11vnc novnc websockify \
-    && apt-get autoclean \
-    && apt-get autoremove \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
-RUN cp /usr/share/novnc/vnc.html /usr/share/novnc/index.html
-
-COPY scripts/* /opt/bin/
-
-# Add Supervisor configuration file
-COPY supervisord.conf /etc/supervisor/
-
-# Relaxing permissions for other non-sudo environments
-RUN  mkdir -p /var/run/supervisor /var/log/supervisor \
-    && chmod -R 777 /opt/bin/ /var/run/supervisor /var/log/supervisor /etc/passwd \
-    && chgrp -R 0 /opt/bin/ /var/run/supervisor /var/log/supervisor \
-    && chmod -R g=u /opt/bin/ /var/run/supervisor /var/log/supervisor
-
-# Creating base directory for Xvfb
-RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
-
-CMD ["/opt/bin/entry_point.sh"]
-
-#============================
-# Utilities
-#============================
-FROM ubuntu-base as ubuntu-utilities
-
+#VNC Server Password
+	VNC_PASS="samplepass" \
+#VNC Server Title(w/o spaces)
+	VNC_TITLE="Ubuntu_Desktop" \
+#VNC Resolution(720p is preferable)
+	VNC_RESOLUTION="1280x720" \
+#Local Display Server Port
+	DISPLAY=:0 \
+#NoVNC Port
+	NOVNC_PORT=$PORT \
+#Ngrok Token (It's advisable to use your personal token, else it may clash with other users & your tunnel may get terminated)
+	NGROK_TOKEN="1tNm3GUFYV1A4lQFXF1bjFvnCvM_4DjiFRiXKGHDaTGBJH8VM" \
+#Locale
+	LANG=en_US.UTF-8 \
+	LANGUAGE=en_US.UTF-8 \
+	LC_ALL=C.UTF-8 \
+	TZ="Asia/Kolkata"
+COPY . /app
 RUN rm -rf /etc/apt/sources.list && \
 #All Official Focal Repos
 	bash -c 'echo -e "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse\ndeb-src http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu focal partner\ndeb-src http://archive.canonical.com/ubuntu focal partner" >/etc/apt/sources.list' && \
@@ -89,33 +75,56 @@ RUN rm -rf /etc/apt/sources.list && \
 	novnc \
 	openvpn \
 	ffmpeg \
+#Fluxbox
+	/app/fluxbox-heroku-mod.deb && \
+#MATE Desktop
+	apt install -y \ 
+	ubuntu-mate-core \
+	ubuntu-mate-desktop && \
+#XFCE Desktop
+	apt install -y \
+	xubuntu-desktop && \
+#TimeZone
+	ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+	echo $TZ > /etc/timezone && \
+#NoVNC
+	cp /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
+	openssl req -new -newkey rsa:4096 -days 36500 -nodes -x509 -subj "/C=IN/ST=Maharastra/L=Private/O=Dis/CN=www.google.com" -keyout /etc/ssl/novnc.key  -out /etc/ssl/novnc.cert && \
+#VS Code
+	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg && \
+	install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/ && \
+	sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list' && \
+	rm -f packages.microsoft.gpg && \
+	apt install apt-transport-https && \
+	apt update && \
+	apt install code -y && \
+	cd /usr/bin && \
+#Brave
+	curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg && \
+	echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main"|tee /etc/apt/sources.list.d/brave-browser-release.list && \
+	apt update && \
+	apt install brave-browser -y && \
+#PeaZip
+	wget https://github.com/peazip/PeaZip/releases/download/7.9.0/peazip_7.9.0.LINUX.x86_64.GTK2.deb && \
+	dpkg -i peazip_7.9.0.LINUX.x86_64.GTK2.deb && \
+	rm -rf peazip_7.9.0.LINUX.x86_64.GTK2.deb && \
+#Sublime
+	curl -fsSL https://download.sublimetext.com/sublimehq-pub.gpg | apt-key add - && \
+	add-apt-repository "deb https://download.sublimetext.com/ apt/stable/" && \
+	apt install -y sublime-text && \
+#Ngrok
+	chmod +x /app/ngrok_install.sh && \
+	/app/ngrok_install.sh && \
+#Telegram
+	wget https://updates.tdesktop.com/tlinux/tsetup.2.7.4.tar.xz -P /tmp && \
+	tar -xvf /tmp/tsetup.2.7.4.tar.xz -C /tmp && \
+	mv /tmp/Telegram/Telegram /usr/bin/telegram && \
+#PowerShell
+	wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -P /tmp && \
+	apt install -y /tmp/packages-microsoft-prod.deb && \
+	apt update && \
+	apt-get install -y powershell
 
+ENTRYPOINT ["supervisord", "-c"]
 
-
-
-# COPY conf.d/* /etc/supervisor/conf.d/
-
-
-#============================
-# GUI
-#============================
-FROM ubuntu-utilities as ubuntu-ui
-
-ENV SCREEN_WIDTH=1280 \
-    SCREEN_HEIGHT=720 \
-    SCREEN_DEPTH=24 \
-    SCREEN_DPI=96 \
-    DISPLAY=:99 \
-    DISPLAY_NUM=99 \
-    UI_COMMAND=/usr/bin/startxfce4
-
-# RUN apt-get update -qqy \
-#     && apt-get -qqy install \
-#         xserver-xorg xserver-xorg-video-fbdev xinit pciutils xinput xfonts-100dpi xfonts-75dpi xfonts-scalable kde-plasma-desktop
-
-RUN apt-get update -qqy \
-    && apt-get -qqy install --no-install-recommends \
-        dbus-x11 xfce4 \
-    && apt-get autoclean \
-    && apt-get autoremove \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+CMD ["/app/supervisord.conf"]
