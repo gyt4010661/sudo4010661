@@ -46,7 +46,6 @@ RUN apt-get -qqy update \
     && apt-add-repository ppa:obsproject/obs-studio \
     && apt update \
     && apt install docker.io -y \
-    && snap install docker -y \
     && apt update \
 
 
